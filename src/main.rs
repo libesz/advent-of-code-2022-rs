@@ -2,7 +2,68 @@ fn main() {
     day1();
     day2();
     day3();
+    day4();
 }
+
+fn day4() {
+    day4_1st();
+    day4_2nd();
+}
+
+fn day4_1st() {
+    let lines: Vec<_> = include_str!("input_day4.txt").lines().collect();
+    let mut pairs: Vec<((i32, i32), (i32, i32))> = vec![];
+
+    for line in lines {
+        let parsed_line = day4_get_ranges(line);
+        pairs.push(parsed_line);
+    }
+    let result = pairs.iter().filter(|&ranges| {
+        (ranges.0.0 <= ranges.1.0 && ranges.0.1 >= ranges.1.1) ||
+        (ranges.1.0 <= ranges.0.0 && ranges.1.1 >= ranges.0.1)
+    }).count();
+    println!("{}", result);
+}
+    
+fn day4_2nd() {
+    let lines: Vec<_> = include_str!("input_day4.txt").lines().collect();
+    let mut pairs: Vec<((i32, i32), (i32, i32))> = vec![];
+
+    for line in lines {
+        let parsed_line = day4_get_ranges(line);
+        pairs.push(parsed_line);
+    }
+    let result = pairs.iter().filter(|&ranges| {
+        (ranges.0.0 <= ranges.1.1 && ranges.0.0 >= ranges.1.0) ||
+        (ranges.0.1 <= ranges.1.1 && ranges.0.1 >= ranges.1.0) ||
+        ((ranges.1.0 <= ranges.0.1 && ranges.1.0 >= ranges.0.0) ||
+        (ranges.1.1 <= ranges.0.1 && ranges.1.1 >= ranges.0.0) )
+    });
+    println!("{}", result.count());
+}
+    
+fn day4_get_ranges(line: &str) -> ((i32, i32), (i32, i32)) {
+    let chunks: Vec<_> = line.split(',').collect();
+    if chunks.len() != 2 {
+        panic!("unexpected chunks length ({}) in line: {}", chunks.len(), line)
+    }
+    let nums0: Vec<_> = chunks[0].split('-').collect();
+    if nums0.len() != 2 {
+        panic!("unexpected nums length ({}) in line: {}", chunks.len(), line)
+    }
+    let ints00 = nums0[0].parse::<i32>().unwrap();
+    let ints01 = nums0[1].parse::<i32>().unwrap();
+
+    let nums1: Vec<_> = chunks[1].split('-').collect();
+    if nums1.len() != 2 {
+        panic!("unexpected nums length ({}) in line: {}", chunks.len(), line)
+    }
+    let ints10 = nums1[0].parse::<i32>().unwrap();
+    let ints11 = nums1[1].parse::<i32>().unwrap();
+
+    ((ints00, ints01), (ints10, ints11))
+}
+
 
 fn day3() {
     day3_1st();
