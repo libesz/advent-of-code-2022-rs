@@ -1,0 +1,7 @@
+$ cd /
+$ ls
+1 abc
+dir def
+$ cd def
+$ ls
+2 ghj

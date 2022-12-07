@@ -1,13 +1,126 @@
-use core::{num};
+use std::{path::PathBuf, collections::HashMap, hash::Hash};
 
 fn main() {
-    day1();
+/*     day1();
     day2();
     day3();
     day4();
     day5();
-    day6();
+    day6(); */
+    day7();
 }
+
+fn day7() {
+    #[derive(Debug)]
+    enum Mode{
+        Command,
+        Output
+    }
+
+    #[derive(Debug)]
+    enum Command {
+        ChDir(String),
+        List(String)
+    }
+
+    #[derive(Debug)]
+    enum Output {
+        SubDir(String),
+        File(String, u64)
+    }
+
+    let lines: Vec<_> = include_str!("input_temp.txt").lines().collect();
+    let mut current_mode = Mode::Command;
+    let mut current_command = Command::ChDir("".into());
+    let mut current_output = Output::File("".into(), 0);
+    let mut current_directory = PathBuf::new();
+
+    let mut dir_sizes = HashMap::<String, u64>::new();
+    for line in lines {
+        let mut line_pieces = line.split_whitespace().into_iter();
+        let mut first_token = "";
+        match line_pieces.next() {
+            Some(token) => {
+                if token == "$" {
+                    current_mode = Mode::Command;
+                } else {
+                    current_mode = Mode::Output;
+                    first_token = token;
+                }
+            },
+            None => todo!(),
+        }
+        match current_mode {
+            Mode::Command => {
+                match line_pieces.next() {
+                    Some(token) => {
+                        match token {
+                            "cd" => {
+                                match line_pieces.next().unwrap() {
+                                    ".." => {
+                                        current_directory = current_directory.parent().unwrap().to_path_buf();
+                                    }
+                                    sub_dir => {
+                                        current_directory = current_directory.join(sub_dir);
+                                    }
+                                }
+                                current_command = Command::ChDir(current_directory.to_str().unwrap().into());
+                            },
+                            "ls" => {
+                                current_command = Command::List(current_directory.to_str().unwrap().into());
+                            },
+                            _ => todo!()
+                        }
+                    }
+                    None => todo!(),
+                }
+            },
+            Mode::Output => {
+                match first_token {
+                    "dir" => {
+                        current_output = Output::SubDir(line_pieces.next().unwrap().into());
+                    },
+                    size_str => {
+                        let file_size = size_str.parse::<u64>().unwrap();
+                        let file_name = line_pieces.next().unwrap();
+                        current_output = Output::File(file_name.into(), file_size);
+
+                        let mut temp = current_directory.clone();
+                        loop {
+                            match temp.parent() {
+                                Some(new_temp) => {
+                                    temp = new_temp.to_path_buf();
+                                    let current_directory_string = String::from(temp.as_path().to_str().unwrap());
+                                    let mut size = file_size;
+                                    match dir_sizes.get(current_directory.clone().as_path().to_str().unwrap()) {
+                                        Some(prev_size) => {size += prev_size},
+                                        None => {},
+                                    }
+                                    _ = dir_sizes.insert(current_directory_string, size);
+
+                                },
+                                None => {break;},
+                            }
+                        }
+                    }
+                }
+            },
+        }
+        println!("line '{}' decoded as: {:?} {:?} {:?}", line, current_mode, current_command, current_output);
+    }
+    for (key, value) in &dir_sizes {
+        println!("{}: {}", key, value);
+    }
+}
+
+/* fn day7_add(map: &mut HashMap<&str, u64>, key: &str, value: u64) {
+    let mut size = value;
+    match dir_sizes.get(current_directory.clone().as_path().to_str().unwrap()) {
+        Some(prev_size) => {size += prev_size},
+        None => {},
+    }
+    _ = dir_sizes.insert(current_directory_string, size);
+} */
 
 fn day6() {
     let lines: Vec<_> = include_str!("input_day6.txt").lines().collect();
