@@ -1,8 +1,137 @@
+use core::{num};
+
 fn main() {
     day1();
     day2();
     day3();
     day4();
+    day5();
+    day6();
+}
+
+fn day6() {
+    let lines: Vec<_> = include_str!("input_day6.txt").lines().collect();
+    if lines.len() != 1 {
+        panic!("single line expected in input, but {}", lines.len());
+    }
+    let input = lines.get(0).unwrap();
+    println!("{:?}", day6_find(4, input.clone()));
+    println!("{:?}", day6_find(14, input));
+}
+
+fn day6_find(x: usize, input: &str) -> (u64, Vec<char>) {
+    let mut last_x = Vec::<char>::new();
+    let mut i: usize= 0;
+    for next_char in input.chars() {
+        if last_x.len() >= x {
+            last_x.drain(0..1);
+        }
+        last_x.push(next_char);
+        i += 1;
+        if last_x.len() == x {
+            let mut not_found_the_same = true;
+            for char_inner in last_x.clone() {
+                if last_x.clone().iter().filter(|c| { **c == char_inner }).count() > 1 {
+                    not_found_the_same = false;
+                    break;
+                }
+            }
+            if not_found_the_same {
+                //println!("{}, {:?}", i, last_x);
+                return (i as u64, last_x);
+            }
+        }
+    }
+    (0, last_x)
+}
+
+fn day5() {
+    #[derive(Clone)]
+    struct Stacks {
+        state: Vec<Vec<char>>
+    }
+    impl Stacks {
+        fn new() -> Self {
+            return Self{state: Vec::<Vec<char>>::new()};
+        }
+        fn init_stacks(&mut self, input: &Vec<&str>) {
+            for j in 0..8 {
+                let line = 7 - j;
+                for i in 0..9 {
+                    let data = input.get(line).unwrap().as_bytes()[1+i*4];
+                    if !data.is_ascii_uppercase() {
+                        continue
+                    }
+                    match self.state.get_mut(i) {
+                        Some(stack) => stack.push(data as char),
+                        None => {
+                            self.state.push(vec![data as char]);
+                        },
+                    }
+                }
+            }
+        }
+        fn dump_state(&self) {
+            for stack in self.state.clone() {
+                println!("{:?}", stack);
+            }
+            println!();
+        }
+        fn dump_top(&self) {
+            for stack in self.state.clone().iter_mut() {
+                print!("{}", stack.pop().unwrap());
+            }
+            println!();
+        }
+        fn parse_move(input: &str) -> Option<(u8, u8, u8)> {
+            if !input.starts_with("move") {
+                return None
+            }
+            let pieces = input.split_whitespace();
+            let number_pieces: Vec<_> = pieces.filter(|c| {
+                match c.parse::<u8>() {
+                    Ok(_) => true,
+                    Err(_) => false,
+                }
+            }).collect();
+            if number_pieces.len() != 3 {
+                panic!("incorrect move parse");
+            }
+            Some((number_pieces[0].parse::<u8>().unwrap(), number_pieces[1].parse::<u8>().unwrap(), number_pieces[2].parse::<u8>().unwrap()))
+        }
+        fn move_item(&mut self, from: usize, to: usize) {
+            //println!("moving from {} (size: {}) to {} (size: {})", from, self.state[from].len(), to, self.state[to].len());
+            let item = self.state[from].pop().unwrap();
+            self.state[to].push(item);
+        }
+        fn move_items(&mut self, amount: usize, from: usize, to: usize) {
+            //println!("moving {} from {} (size: {}) to {} (size: {})", amount, from, self.state[from].len(), to, self.state[to].len());
+            let start_pos = self.state[from].len();
+            let mut items = self.state[from].split_off((start_pos - amount) as usize);
+            //let item = self.state[from].pop().unwrap();
+            self.state[to].append(&mut items);
+        }
+    }
+    let lines: Vec<_> = include_str!("input_day5.txt").lines().collect();
+    let mut stacks = Stacks::new();
+    stacks.init_stacks(&lines);
+    let mut stacks2 = stacks.clone();
+    for moves in lines {
+        match Stacks::parse_move(moves) {
+            Some(one_move) => {
+                //println!("{:?}", one_move);
+                for _ in 0..one_move.0 {
+                    stacks.move_items(1 as usize,(one_move.1 - 1) as usize, (one_move.2 - 1) as usize);
+                }
+                stacks2.move_items(one_move.0 as usize,(one_move.1 - 1) as usize, (one_move.2 - 1) as usize);
+            },
+            None => {},
+        }
+        //stacks.dump_state();
+    }
+    stacks.dump_top();
+    stacks2.dump_top();
+
 }
 
 fn day4() {
