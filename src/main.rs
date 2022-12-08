@@ -1,13 +1,13 @@
 use std::{path::PathBuf, collections::HashMap, hash::Hash};
 
 fn main() {
-/*     day1();
+    day1();
     day2();
     day3();
     day4();
     day5();
     day6();
-    day7(); */
+    day7();
     day8();
 }
 
@@ -15,83 +15,115 @@ fn day8() {
     let lines: Vec<_> = include_str!("input_day8.txt").lines().collect();
     let mut data = Vec::<Vec<u32>>::new();
     let mut result = Vec::<Vec<bool>>::new();
+    let mut result2 = Vec::<Vec<Vec<usize>>>::new();
     for (i, line) in lines.iter().enumerate() {
         data.push(Vec::<u32>::new());
         result.push(Vec::<bool>::new());
+        result2.push(Vec::<Vec<usize>>::new());
         for number in line.chars().map(|single_letter| { single_letter.to_digit(10).unwrap() }) {
             data[i].push(number);
             result[i].push(false);
+            result2[i].push(Vec::<usize>::new());
         }
     }
 
     for (y, data_line) in data.iter().enumerate() {
-        'next_point:
         for (x, actual) in data_line.iter().enumerate() {
-            let mut found_higher = false;
             //println!("*** x: {}, y: {}", x, y);
-            //println!("from the left");
-            for i in 0..x {
+
+            let mut found_highers = Vec::<bool>::new();
+            let mut found_higher_in_one_direction = false;
+            let mut distance_until_first_higher = 0;
+
+            //println!("to the left");
+            for i in (0..x).rev() {
                 //println!("x: {}, y: {}, actual: {}, other: {}", i, y, actual, data[y][i]);
                 if data[y][i] >= *actual {
-                    found_higher = true;
+                    found_higher_in_one_direction = true;
+                    break;
+                } else {
+                    distance_until_first_higher += 1;
                 }
             }
-            if !found_higher {
-                result[y][x] = true;
-                continue 'next_point;
-            }
-            found_higher = false;
+            if found_higher_in_one_direction { distance_until_first_higher += 1; }
 
-            //println!("from the right");
+            found_highers.push(found_higher_in_one_direction);
+            result2[y][x].push(distance_until_first_higher);
+            found_higher_in_one_direction = false;
+            distance_until_first_higher = 0;
+
+            //println!("to the right");
             for i in x+1..data_line.len() {
                 //println!("x: {}, y: {}, actual: {}, other: {}", i, y, actual, data[y][i]);
                 if data[y][i] >= *actual {
-                    found_higher = true;
+                    found_higher_in_one_direction = true;
+                    break;
+                } else {
+                    distance_until_first_higher += 1;
                 }
             }
-            if !found_higher {
-                result[y][x] = true;
-                continue 'next_point;
-            }
-            found_higher = false;
+            if found_higher_in_one_direction { distance_until_first_higher += 1; }
+            
+            found_highers.push(found_higher_in_one_direction);
+            result2[y][x].push(distance_until_first_higher);
+            found_higher_in_one_direction = false;
+            distance_until_first_higher = 0;
 
-            //println!("from the bottom");
+            //println!("to the bottom");
             for i in y+1..data.len() {
                 //println!("x: {}, y: {}, actual: {}, other: {}", x, i, actual, data[y][i]);
                 if data[i][x] >= *actual {
-                    found_higher = true;
+                    found_higher_in_one_direction = true;
+                    break;
+                } else {
+                    distance_until_first_higher += 1;
                 }
             }
-            if !found_higher {
-                result[y][x] = true;
-                continue 'next_point;
-            }
-            found_higher = false;
+            if found_higher_in_one_direction { distance_until_first_higher += 1; }
+            
+            found_highers.push(found_higher_in_one_direction);
+            result2[y][x].push(distance_until_first_higher);
+            found_higher_in_one_direction = false;
+            distance_until_first_higher = 0;
+
 
             //println!("from the top");
-            for i in 0..y {
+            for i in (0..y).rev() {
                 //println!("x: {}, y: {},, actual: {}, other: {}", x, i, actual, data[y][i]);
                 if data[i][x] >= *actual {
-                    found_higher = true;
+                    found_higher_in_one_direction = true;
+                    break;
+                } else {
+                    distance_until_first_higher += 1;
                 }
             }
-            if !found_higher {
+            if found_higher_in_one_direction { distance_until_first_higher += 1; }
+            
+            found_highers.push(found_higher_in_one_direction);
+            result2[y][x].push(distance_until_first_higher);
+            //println!("{:?}", found_highers);
+
+            if found_highers.contains(&false) {
                 result[y][x] = true;
             }
         }
     }
-/*     for (y, data_line) in data.iter().enumerate() {
-        for (x, data_point) in data_line.iter().enumerate() {
-            print!("({}, {})", data_point, result[y][x]);
-
-        }
-        println!();
-    } */
     let mut total_visible = 0;
     for result_line in result {
         total_visible += result_line.iter().filter(|temp|{**temp}).count();
     }
-    println!("{}", total_visible);
+    println!("answer 1: {}", total_visible);
+
+    let mut highest_scenic = 0;
+    for result2_line in result2 {
+        for result_point in result2_line {
+            let scenic = result_point.iter().fold(1, |res, a| {res * a});
+            if highest_scenic < scenic {
+                highest_scenic = scenic;
+            }
+        }
+    }
+    println!("answer 2: {}", highest_scenic);
 }
 
 fn day7() {
