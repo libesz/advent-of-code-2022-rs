@@ -1,12 +1,12 @@
 use std::{path::PathBuf, collections::HashMap, hash::Hash};
 
 fn main() {
-/*     day1();
+    day1();
     day2();
     day3();
     day4();
     day5();
-    day6(); */
+    day6();
     day7();
 }
 
@@ -92,7 +92,7 @@ fn day7() {
                             Some(prev_size) => {size += prev_size},
                             None => {},
                         }
-                        println!("insert 1: {}, {}", current_directory_string, size);
+                        //println!("insert 1: {}, {}", current_directory_string, size);
                         _ = dir_sizes.insert(current_directory_string.clone(), size);
 
                         loop {
@@ -106,7 +106,7 @@ fn day7() {
                                         Some(prev_size) => {size += prev_size},
                                         None => {},
                                     }
-                                    println!("insert 2: {}, {}", current_directory_string.clone(), size);
+                                    //println!("insert 2: {}, {}", current_directory_string.clone(), size);
                                     _ = dir_sizes.insert(current_directory_string.clone(), size);
 
                                 },
@@ -118,15 +118,37 @@ fn day7() {
             },
         }
         //println!("line '{}' decoded as: {:?} {:?} {:?}", line, current_mode, current_command, current_output);
-        let mut total = 0u64;
-        for (key, value) in &dir_sizes {
-            if *value <= 100000 {
-                println!("{}: {}", key, value);
-                total += value;
-            }
-        }
-        println!("total: {}", total);
     }
+    let mut total_used_under_100k = 0u64;
+    let mut total_used = 0u64;
+    for (key, value) in &dir_sizes {
+        if *key == "/".to_string() {
+            total_used = *value;
+        }
+        if *value <= 100000 {
+            //println!("{}: {}", key, value);
+            total_used_under_100k += value;
+        }
+    }
+    println!("total_used_under_100k (first answer): {}", total_used_under_100k);
+    println!("total_used: {}", total_used);
+    let disk_size = 70_000_000u64;
+    let free_space = disk_size - total_used;
+    println!("free_space: {}", free_space);
+    
+    let free_space_needed = 30_000_000u64;
+    let mut delete_candidate_size = free_space_needed;
+    let mut delete_candidate_name = String::new();
+    for (key, value) in &dir_sizes {
+        let would_free = free_space + *value;
+        if would_free > free_space_needed && *value < delete_candidate_size {
+            delete_candidate_name = key.clone();
+            delete_candidate_size = *value;
+            println!("new delete candidate: {} {}", delete_candidate_name, delete_candidate_size)
+        }  
+    }
+    println!("final delete candidate (second answer): {} {}", delete_candidate_name, delete_candidate_size)
+
 }
 
 /* fn day7_add(map: &mut HashMap<&str, u64>, key: &str, value: u64) {
