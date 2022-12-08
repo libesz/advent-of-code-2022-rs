@@ -1,13 +1,97 @@
 use std::{path::PathBuf, collections::HashMap, hash::Hash};
 
 fn main() {
-    day1();
+/*     day1();
     day2();
     day3();
     day4();
     day5();
     day6();
-    day7();
+    day7(); */
+    day8();
+}
+
+fn day8() {
+    let lines: Vec<_> = include_str!("input_day8.txt").lines().collect();
+    let mut data = Vec::<Vec<u32>>::new();
+    let mut result = Vec::<Vec<bool>>::new();
+    for (i, line) in lines.iter().enumerate() {
+        data.push(Vec::<u32>::new());
+        result.push(Vec::<bool>::new());
+        for number in line.chars().map(|single_letter| { single_letter.to_digit(10).unwrap() }) {
+            data[i].push(number);
+            result[i].push(false);
+        }
+    }
+
+    for (y, data_line) in data.iter().enumerate() {
+        'next_point:
+        for (x, actual) in data_line.iter().enumerate() {
+            let mut found_higher = false;
+            //println!("*** x: {}, y: {}", x, y);
+            //println!("from the left");
+            for i in 0..x {
+                //println!("x: {}, y: {}, actual: {}, other: {}", i, y, actual, data[y][i]);
+                if data[y][i] >= *actual {
+                    found_higher = true;
+                }
+            }
+            if !found_higher {
+                result[y][x] = true;
+                continue 'next_point;
+            }
+            found_higher = false;
+
+            //println!("from the right");
+            for i in x+1..data_line.len() {
+                //println!("x: {}, y: {}, actual: {}, other: {}", i, y, actual, data[y][i]);
+                if data[y][i] >= *actual {
+                    found_higher = true;
+                }
+            }
+            if !found_higher {
+                result[y][x] = true;
+                continue 'next_point;
+            }
+            found_higher = false;
+
+            //println!("from the bottom");
+            for i in y+1..data.len() {
+                //println!("x: {}, y: {}, actual: {}, other: {}", x, i, actual, data[y][i]);
+                if data[i][x] >= *actual {
+                    found_higher = true;
+                }
+            }
+            if !found_higher {
+                result[y][x] = true;
+                continue 'next_point;
+            }
+            found_higher = false;
+
+            //println!("from the top");
+            for i in 0..y {
+                //println!("x: {}, y: {},, actual: {}, other: {}", x, i, actual, data[y][i]);
+                if data[i][x] >= *actual {
+                    found_higher = true;
+                }
+            }
+            if !found_higher {
+                result[y][x] = true;
+            }
+        }
+    }
+/*     for (y, data_line) in data.iter().enumerate() {
+        for (x, data_point) in data_line.iter().enumerate() {
+            print!("({}, {})", data_point, result[y][x]);
+
+        }
+        println!();
+    } */
+    let mut total_visible = 0;
+    for result_line in result {
+        total_visible += result_line.iter().filter(|temp|{**temp}).count();
+    }
+    println!("{}", total_visible);
 }
 
 fn day7() {
