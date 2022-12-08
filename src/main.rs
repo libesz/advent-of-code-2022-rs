@@ -29,7 +29,7 @@ fn day7() {
         File(String, u64)
     }
 
-    let lines: Vec<_> = include_str!("input_temp.txt").lines().collect();
+    let lines: Vec<_> = include_str!("input_day7.txt").lines().collect();
     let mut current_mode = Mode::Command;
     let mut current_command = Command::ChDir("".into());
     let mut current_output = Output::File("".into(), 0);
@@ -86,17 +86,28 @@ fn day7() {
                         current_output = Output::File(file_name.into(), file_size);
 
                         let mut temp = current_directory.clone();
+                        let current_directory_string = String::from(temp.as_path().to_str().unwrap());
+                        let mut size = file_size;
+                        match dir_sizes.get(current_directory.clone().as_path().to_str().unwrap()) {
+                            Some(prev_size) => {size += prev_size},
+                            None => {},
+                        }
+                        println!("insert 1: {}, {}", current_directory_string, size);
+                        _ = dir_sizes.insert(current_directory_string.clone(), size);
+
                         loop {
                             match temp.parent() {
                                 Some(new_temp) => {
                                     temp = new_temp.to_path_buf();
-                                    let current_directory_string = String::from(temp.as_path().to_str().unwrap());
                                     let mut size = file_size;
-                                    match dir_sizes.get(current_directory.clone().as_path().to_str().unwrap()) {
+
+                                    let current_directory_string = String::from(temp.as_path().to_str().unwrap());
+                                    match dir_sizes.get(temp.clone().as_path().to_str().unwrap()) {
                                         Some(prev_size) => {size += prev_size},
                                         None => {},
                                     }
-                                    _ = dir_sizes.insert(current_directory_string, size);
+                                    println!("insert 2: {}, {}", current_directory_string.clone(), size);
+                                    _ = dir_sizes.insert(current_directory_string.clone(), size);
 
                                 },
                                 None => {break;},
@@ -106,10 +117,15 @@ fn day7() {
                 }
             },
         }
-        println!("line '{}' decoded as: {:?} {:?} {:?}", line, current_mode, current_command, current_output);
-    }
-    for (key, value) in &dir_sizes {
-        println!("{}: {}", key, value);
+        //println!("line '{}' decoded as: {:?} {:?} {:?}", line, current_mode, current_command, current_output);
+        let mut total = 0u64;
+        for (key, value) in &dir_sizes {
+            if *value <= 100000 {
+                println!("{}: {}", key, value);
+                total += value;
+            }
+        }
+        println!("total: {}", total);
     }
 }
 
