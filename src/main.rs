@@ -1,15 +1,78 @@
 use std::{path::PathBuf, collections::HashMap, hash::Hash};
 
 fn main() {
-    day1();
+/*     day1();
     day2();
     day3();
     day4();
     day5();
     day6();
     day7();
-    day8();
+    day8(); */
+    day9();
 }
+
+fn day9() {
+
+    let lines: Vec<_> = include_str!("input_day9.txt").lines().collect();
+
+    let mut head_position = (0, 0);
+    let mut tail_position = (0, 0);
+    let mut tail_position_hist = HashMap::<(i32,i32), usize>::new();
+    let mut tail_position_last_x = Vec::<(i32,i32)>::new();
+    //tail_position_hist.entry(tail_position).or_insert(1);
+    tail_position_last_x.push((0,0));
+
+    for line in lines {
+        let mut head_move = line.split_whitespace();
+        //println!("{:?}", line);
+
+        let (direction, distance) = (head_move.next().unwrap(), head_move.next().unwrap().parse::<i32>().unwrap());
+
+        for _ in (0..distance).rev() {
+            match direction {
+                "U" => {
+                    head_position.1 += 1;
+                },
+                "D" => {
+                    head_position.1 -= 1;
+                },
+                "R" => {
+                    head_position.0 += 1;
+                },
+                "L" => {
+                    head_position.0 -= 1;
+                },
+                _ => todo!()
+            }
+            if head_position.1 > (tail_position.1 + 1) {
+                tail_position.1 += 1;
+                tail_position.0 = head_position.0;
+            }
+            if head_position.1 < (tail_position.1 - 1) {
+                tail_position.1 -= 1;
+                tail_position.0 = head_position.0;
+            }
+            if head_position.0 > (tail_position.0 + 1) {
+                tail_position.0 += 1;
+                tail_position.1 = head_position.1;
+            }
+            if head_position.0 < (tail_position.0 - 1) {
+                tail_position.0 -= 1;
+                tail_position.1 = head_position.1;
+            }
+            //println!("{:?} {:?}", head_position, tail_position);
+            let counter = tail_position_hist.entry(tail_position).or_insert(0);
+            *counter += 1;
+        }
+    }
+    //println!();
+    println!("tail map size: {}", tail_position_hist.keys().count());
+    //println!();
+/*     for (key, value) in tail_position_hist.into_iter() {
+        println!("{:?}: {}", key, value);
+    }
+ */}
 
 fn day8() {
     let lines: Vec<_> = include_str!("input_day8.txt").lines().collect();
