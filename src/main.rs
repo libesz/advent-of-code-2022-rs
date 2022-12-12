@@ -1,78 +1,95 @@
 use std::{path::PathBuf, collections::HashMap, hash::Hash};
 
 fn main() {
-/*     day1();
+    day1();
     day2();
     day3();
     day4();
     day5();
     day6();
     day7();
-    day8(); */
+    day8();
     day9();
 }
 
 fn day9() {
-
     let lines: Vec<_> = include_str!("input_day9.txt").lines().collect();
+    println!("{}", day9_run(2, lines.clone()));
+    println!("{}", day9_run(10, lines));
+}
 
-    let mut head_position = (0, 0);
-    let mut tail_position = (0, 0);
+fn day9_run(rope_size: usize, lines: Vec<&str>) -> usize {
     let mut tail_position_hist = HashMap::<(i32,i32), usize>::new();
-    let mut tail_position_last_x = Vec::<(i32,i32)>::new();
-    //tail_position_hist.entry(tail_position).or_insert(1);
-    tail_position_last_x.push((0,0));
+    let mut positions = Vec::<(i32,i32)>::new();
+    for _ in 0..rope_size {
+        positions.push((0,0));
+    }
 
     for line in lines {
         let mut head_move = line.split_whitespace();
-        //println!("{:?}", line);
-
         let (direction, distance) = (head_move.next().unwrap(), head_move.next().unwrap().parse::<i32>().unwrap());
 
         for _ in (0..distance).rev() {
             match direction {
                 "U" => {
-                    head_position.1 += 1;
+                    positions[0].1 += 1;
                 },
                 "D" => {
-                    head_position.1 -= 1;
+                    positions[0].1 -= 1;
                 },
                 "R" => {
-                    head_position.0 += 1;
+                    positions[0].0 += 1;
                 },
                 "L" => {
-                    head_position.0 -= 1;
+                    positions[0].0 -= 1;
                 },
                 _ => todo!()
             }
-            if head_position.1 > (tail_position.1 + 1) {
-                tail_position.1 += 1;
-                tail_position.0 = head_position.0;
+            let mut current = 0;
+            for next in 1..rope_size {
+                if positions[current].1 == (positions[next].1 + 2) {
+                    positions[next].1 += 1;
+                    if positions[current].0 >= (positions[next].0 + 1) {
+                        positions[next].0 += 1;
+                    }
+                    if positions[current].0 <= (positions[next].0 - 1) {
+                        positions[next].0 -= 1;
+                    }
+                } else if positions[current].1 == (positions[next].1 - 2) {
+                    positions[next].1 -= 1;
+                    if positions[current].0 >= (positions[next].0 + 1) {
+                        positions[next].0 += 1;
+                    }
+                    if positions[current].0 <= (positions[next].0 - 1) {
+                        positions[next].0 -= 1;
+                    }
+                } else if positions[current].0 == (positions[next].0 + 2) {
+                    positions[next].0 += 1;
+                    if positions[current].1 >= (positions[next].1 + 1) {
+                        positions[next].1 += 1;
+                    }
+                    if positions[current].1 <= (positions[next].1 - 1) {
+                        positions[next].1 -= 1;
+                    }
+                } else if positions[current].0 == (positions[next].0 - 2) {
+                    positions[next].0 -= 1;
+                    if positions[current].1 >= (positions[next].1 + 1) {
+                        positions[next].1 += 1;
+                    }
+                    if positions[current].1 <= (positions[next].1 - 1) {
+                        positions[next].1 -= 1;
+                    }
+                }
+                
+                current = next;
             }
-            if head_position.1 < (tail_position.1 - 1) {
-                tail_position.1 -= 1;
-                tail_position.0 = head_position.0;
-            }
-            if head_position.0 > (tail_position.0 + 1) {
-                tail_position.0 += 1;
-                tail_position.1 = head_position.1;
-            }
-            if head_position.0 < (tail_position.0 - 1) {
-                tail_position.0 -= 1;
-                tail_position.1 = head_position.1;
-            }
-            //println!("{:?} {:?}", head_position, tail_position);
-            let counter = tail_position_hist.entry(tail_position).or_insert(0);
+            let counter = tail_position_hist.entry(positions[rope_size-1]).or_insert(0);
             *counter += 1;
         }
     }
-    //println!();
-    println!("tail map size: {}", tail_position_hist.keys().count());
-    //println!();
-/*     for (key, value) in tail_position_hist.into_iter() {
-        println!("{:?}: {}", key, value);
-    }
- */}
+
+    tail_position_hist.keys().count()
+}
 
 fn day8() {
     let lines: Vec<_> = include_str!("input_day8.txt").lines().collect();
