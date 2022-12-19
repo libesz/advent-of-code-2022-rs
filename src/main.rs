@@ -1,4 +1,4 @@
-use std::{path::PathBuf, collections::HashMap, hash::Hash};
+use std::{path::PathBuf, collections::HashMap};
 
 fn main() {
     day1();
@@ -10,6 +10,37 @@ fn main() {
     day7();
     day8();
     day9();
+    day10();
+}
+
+fn day10() {
+    let lines: Vec<_> = include_str!("input_day10.txt").lines().collect();
+    let mut cycle_count = 0;
+    let mut value = 1;
+    let mut result = 0;
+    for line in lines {
+        if line != "noop" {
+            cycle_count += 1;
+            result += day10_check(cycle_count, value);
+            cycle_count += 1;
+            result += day10_check(cycle_count, value);
+            value += line.split_ascii_whitespace().into_iter().nth(1).unwrap().parse::<i32>().unwrap();
+            //day10_check(cycle_count, value);
+        } else {
+            cycle_count += 1;
+            result += day10_check(cycle_count, value);
+        }
+    }
+    println!("result: {}", result);
+}
+
+fn day10_check(cycle_count: i32, value: i32) -> i32 {
+    if cycle_count == 20 || cycle_count == 60 || cycle_count == 100 || cycle_count == 140 || cycle_count == 180 || cycle_count == 220 {
+        //println!("cycle: {}, value: {}, signal: {}", cycle_count, value, cycle_count * value);
+        cycle_count * value
+    } else {
+        0
+    }
 }
 
 fn day9() {
